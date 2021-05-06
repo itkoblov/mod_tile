@@ -85,8 +85,8 @@ m_error()
     m_info "resetting state"
     /bin/cp $WORKOSM_DIR/last.state.txt $WORKOSM_DIR/state.txt || true
     
-    rm "$CHANGE_FILE" || true
-    rm "$EXPIRY_FILE.$$" || true
+    rm -f "$CHANGE_FILE" || true
+    rm -f "$EXPIRY_FILE.$$" || true
     rm "$LOCK_FILE"
     exit
 }
