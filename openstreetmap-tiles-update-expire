@@ -158,7 +158,7 @@ fi
     
 m_ok "filtering diff"
 if ! $TRIM_BIN $TRIM_OPTIONS $TRIM_REGION_OPTIONS  -z $CHANGE_FILE $CHANGE_FILE 1>&2 2>> "$RUNLOG"; then
-    m_error "Trim_osc error"
+    m_ok "Trim_osc error but continue anyway"
 fi
 
     m_ok "importing diff"
