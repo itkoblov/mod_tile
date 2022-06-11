@@ -47,25 +47,56 @@ cd /var/cache/renderd/pyosmium/
 rm newchange.osc.gz > pyosmium.$$ 2>&1
 pyosmium-get-changes -f sequence.state -o newchange.osc.gz >> pyosmium.$$ 2>&1
 #
+#------------------------------------------------------------------------------
+# Trim the downloaded changes to only the ones that apply to our region.
+#
+# When using trim_osc.py we can define either a bounding box (such as this
+# example for England and Wales) or a polygon.
+# See https://github.com/zverik/regional .
+# This area will usually correspond to the data originally loaded.
+#------------------------------------------------------------------------------
+TRIM_BIN=/home/ajtown/src/regional/trim_osc.py
+TRIM_REGION_OPTIONS="-b -14.17 48.85 2.12 61.27"
+#TRIM_REGION_OPTIONS="-p region.poly"
+
+if [[ -f $TRIM_BIN ]]
+then
+    echo "Filtering newchange.osc.gz"
+    if ! $TRIM_BIN -d gis $TRIM_REGION_OPTIONS  -z newchange.osc.gz newchange.osc.gz > trim.$$ 2>&1
+    then
+        echo "Trim_osc error but continue anyway"
+    fi
+else
+    echo "${TRIM_BIN} does not exist"
+    exit 1
+fi
+#
+#------------------------------------------------------------------------------
 # The osm2pgsql append line will need to be tailored to match the running system (memory and number of processors), the style in use, and
 # the number of zoom levels to write dirty tiles for.
+#------------------------------------------------------------------------------
+echo "Importing newchange.osc.gz"
 osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 -S /home/ajtown/src/openstreetmap-carto-AJT/openstreetmap-carto.style --multi-geometry --tag-transform-script /home/ajtown/src/SomeoneElse-style/style.lua --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osmpgsql.$$ 2>&1
+tail -1 osmpgsql.$$
 #
+#------------------------------------------------------------------------------
 # This line is exactly the same as the "expire_tiles.sh"
 # that would be used with "update_tiles.sh" (which calls "osm2pgsql-replication update" rather than the more flexible "pyosmium-get-changes")
 # The arguments can be tailored to do different things at different zoom levels as desired.
+#------------------------------------------------------------------------------
+echo "Expiring tiles"
 render_expired --map=s2o --min-zoom=13 --touch-from=13 --delete-from=19 --max-zoom=20 -s /run/renderd/renderd.sock < /var/cache/renderd/pyosmium/dirty_tiles.txt > render_expired.$$ 2>&1
+tail -9 render_expired.$$
 #
 rm /var/cache/renderd/pyosmium/dirty_tiles.txt >> pyosmium.$$ 2>&1
 #
-cat pyosmium.$$
-rm pyosmium.$$
-#
-tail -1 osmpgsql.$$
+#------------------------------------------------------------------------------
+# Tidy up files containing output from each command.
+#------------------------------------------------------------------------------
+rm trim.$$
 rm osmpgsql.$$
-#
-tail -9 render_expired.$$
 rm render_expired.$$
+rm pyosmium.$$
 #
 echo "Database Replication Lag:"
 pyosmium_replag.sh -h
