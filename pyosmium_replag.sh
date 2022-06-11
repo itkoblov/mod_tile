@@ -20,19 +20,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; If not, see http://www.gnu.org/licenses/.
 #
-statenumber=`cat /var/cache/renderd/pyosmium/sequence.state`
-#echo $statenumber
-#
 state1=`cat /var/cache/renderd/pyosmium/sequence.state | cut -c1`
-#echo $state1
-#
 state2=`cat /var/cache/renderd/pyosmium/sequence.state | cut -c2-4`
-#echo $state2
-#
 state3=`cat /var/cache/renderd/pyosmium/sequence.state | cut -c5-7`
-#echo $state3
 #
-curl -s https://planet.openstreetmap.org/replication/minute/00${state1}/${state2}/${state3}.state.txt > state.$$
+curl --silent --connect-timeout 10  --output state.$$ https://planet.openstreetmap.org/replication/minute/00${state1}/${state2}/${state3}.state.txt
+if [ ! -s state.$$ ]
+then
+    echo Download of https://planet.openstreetmap.org/replication/minute/00${state1}/${state2}/${state3}.state.txt failed
+    exit 1
+fi
 
 STATE=state.$$
 
