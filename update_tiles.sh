@@ -1,0 +1,2 @@
+#!/bin/bash
+osm2pgsql-replication update -d gis --post-processing /usr/local/sbin/expire_tiles.sh --max-diff-size 10  -- --multi-geometry --tag-transform-script /home/renderaccount/src/openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 2 -S /home/renderaccount/src/openstreetmap-carto/openstreetmap-carto.style --expire-tiles=1-20 --expire-output=/home/renderaccount/data/dirty_tiles.txt
