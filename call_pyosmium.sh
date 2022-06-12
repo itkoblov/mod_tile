@@ -40,11 +40,20 @@ then
     exit 1
 fi
 #
+if [[ -f /var/cache/renderd/pyosmium/call_pyosmium.running ]]
+then
+    echo "call_pyosmium alreadying running; /var/cache/renderd/pyosmium/call_pyosmium.running exists"
+    exit 1
+else
+    touch /var/cache/renderd/pyosmium/call_pyosmium.running
+fi
+#
 echo
 echo "Pyosmium update started: " `date`
 #
 cd /var/cache/renderd/pyosmium/
 rm newchange.osc.gz > pyosmium.$$ 2>&1
+cp sequence.state sequence.state.old
 pyosmium-get-changes -f sequence.state -o newchange.osc.gz >> pyosmium.$$ 2>&1
 #
 #------------------------------------------------------------------------------
@@ -76,8 +85,21 @@ fi
 # the number of zoom levels to write dirty tiles for.
 #------------------------------------------------------------------------------
 echo "Importing newchange.osc.gz"
-osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 -S /home/ajtown/src/openstreetmap-carto-AJT/openstreetmap-carto.style --multi-geometry --tag-transform-script /home/ajtown/src/SomeoneElse-style/style.lua --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osmpgsql.$$ 2>&1
-tail -1 osmpgsql.$$
+if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 -S /home/ajtown/src/openstreetmap-carto-AJT/openstreetmap-carto.style --multi-geometry --tag-transform-script /home/ajtown/src/SomeoneElse-style/style.lua --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
+then
+    # ------------------------------------------------------------------------------
+    # The osm2pgsql import failed; show the error, revert to the previous import
+    # sequence and remove the "running" flag to try again.
+    # Don't delete the command output files to allow later investigation.
+    # ------------------------------------------------------------------------------
+    echo "osm2pgsql append error"
+    cat osm2pgsql.$$
+    cp sequence.state.old sequence.state
+    rm /var/cache/renderd/pyosmium/call_pyosmium.running
+    exit 1
+else
+    tail -1 osm2pgsql.$$
+fi
 #
 #------------------------------------------------------------------------------
 # This line is exactly the same as the "expire_tiles.sh"
@@ -91,13 +113,14 @@ tail -9 render_expired.$$
 rm /var/cache/renderd/pyosmium/dirty_tiles.txt >> pyosmium.$$ 2>&1
 #
 #------------------------------------------------------------------------------
-# Tidy up files containing output from each command.
+# Tidy up files containing output from each command and the file that shows
+# that the script is running
 #------------------------------------------------------------------------------
 rm trim.$$
-rm osmpgsql.$$
+rm osm2pgsql.$$
 rm render_expired.$$
 rm pyosmium.$$
+rm /var/cache/renderd/pyosmium/call_pyosmium.running
 #
-echo "Database Replication Lag:"
-pyosmium_replag.sh -h
+echo "Database Replication Lag:" `pyosmium_replag.sh -h`
 #
