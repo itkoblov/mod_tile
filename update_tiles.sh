@@ -10,7 +10,7 @@ fi
 #
 if [[ -f /var/cache/renderd/update_tiles.sh.running ]]
 then
-    echo "update_tiles.sh alreadying running; /var/cache/renderd/pyosmium/call_pyosmium.running exists"
+    echo "update_tiles.sh alreadying running; /var/cache/renderd/update_tiles.sh exists"
     exit 1
 else
     touch /var/cache/renderd/update_tiles.sh.running
