@@ -54,7 +54,7 @@ echo "Pyosmium update started: " `date`
 cd /var/cache/renderd/pyosmium/
 rm newchange.osc.gz > pyosmium.$$ 2>&1
 cp sequence.state sequence.state.old
-pyosmium-get-changes -f sequence.state -o newchange.osc.gz >> pyosmium.$$ 2>&1
+pyosmium-get-changes -f sequence.state -o newchange.osc.gz -s 20 >> pyosmium.$$ 2>&1
 #
 #------------------------------------------------------------------------------
 # Trim the downloaded changes to only the ones that apply to our region.
