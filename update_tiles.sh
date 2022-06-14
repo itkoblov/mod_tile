@@ -10,7 +10,7 @@ fi
 #
 if [[ -f /var/cache/renderd/update_tiles.sh.running ]]
 then
-    echo "update_tiles.sh alreadying running; /var/cache/renderd/update_tiles.sh exists"
+    echo "update_tiles.sh alreadying running; /var/cache/renderd/update_tiles.sh.running exists"
     exit 1
 else
     touch /var/cache/renderd/update_tiles.sh.running
