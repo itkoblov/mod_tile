@@ -20,6 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; If not, see http://www.gnu.org/licenses/.
 #
+cd /tmp
 state1=`cat /var/cache/renderd/pyosmium/sequence.state | cut -c1`
 state2=`cat /var/cache/renderd/pyosmium/sequence.state | cut -c2-4`
 state3=`cat /var/cache/renderd/pyosmium/sequence.state | cut -c5-7`
