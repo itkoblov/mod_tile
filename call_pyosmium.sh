@@ -54,6 +54,11 @@ echo "Pyosmium update started: " `date`
 cd /var/cache/renderd/pyosmium/
 rm newchange.osc.gz > pyosmium.$$ 2>&1
 cp sequence.state sequence.state.old
+#------------------------------------------------------------------------------
+# "-s 20" here means "get 20MB at once".  
+# The value can be adjusted up or down as needed.
+#------------------------------------------------------------------------------
+#
 pyosmium-get-changes -f sequence.state -o newchange.osc.gz -s 20 >> pyosmium.$$ 2>&1
 #
 #------------------------------------------------------------------------------
