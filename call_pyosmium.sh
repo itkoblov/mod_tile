@@ -69,7 +69,7 @@ pyosmium-get-changes -f sequence.state -o newchange.osc.gz -s 20 >> pyosmium.$$ 
 # See https://github.com/zverik/regional .
 # This area will usually correspond to the data originally loaded.
 #------------------------------------------------------------------------------
-TRIM_BIN=/home/renderaccount/src/regional/trim_osc.py
+TRIM_BIN=/home/ajtown/src/regional/trim_osc.py
 TRIM_REGION_OPTIONS="-b -14.17 48.85 2.12 61.27"
 #TRIM_REGION_OPTIONS="-p region.poly"
 
@@ -90,7 +90,7 @@ fi
 # the number of zoom levels to write dirty tiles for.
 #------------------------------------------------------------------------------
 echo "Importing newchange.osc.gz"
-if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 --multi-geometry --tag-transform-script /home/renderaccount/src/openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 2 -S /home/renderaccount/src/openstreetmap-carto/openstreetmap-carto.style --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
+if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 -S /home/ajtown/src/openstreetmap-carto-AJT/openstreetmap-carto.style --multi-geometry --tag-transform-script /home/ajtown/src/SomeoneElse-style/style.lua --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
 then
     # ------------------------------------------------------------------------------
     # The osm2pgsql import failed; show the error, revert to the previous import
