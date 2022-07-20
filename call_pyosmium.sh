@@ -16,6 +16,8 @@
 #
 # with an appropriate date.
 #
+local_filesystem_user=renderaccount
+#
 if [[ ! -f /var/cache/renderd/pyosmium/sequence.state ]]
 then
     echo "/var/cache/renderd/pyosmium/sequence.state does not exist"
@@ -86,11 +88,97 @@ else
 fi
 #
 #------------------------------------------------------------------------------
+# Welsh, English and Scottish names need to be converted to "cy or en", "en" and "gd or en" respectively.
+# First, convert a Welsh name portion into Welsh
+#------------------------------------------------------------------------------
+if osmium extract --polygon /home/${local_filesystem_user}/src/SomeoneElse-style/welsh_areas.geojson newchange.osc.gz -O -o welshlangpart_newchange_before.osc.gz
+then
+    echo Welsh Extract OK
+else
+    echo Welsh Extract Error
+    exit 1
+fi
+
+if /home/${local_filesystem_user}/src/osm-tags-transform/build/src/osm-tags-transform -c /home/${local_filesystem_user}/src/SomeoneElse-style/transform_cy.lua welshlangpart_newchange_before.osc.gz -O -o welshlangpart_newchange_after.osc.gz
+then
+    echo Welsh Transform OK
+else
+    echo Welsh Transform Error
+    exit 1
+fi
+
+#------------------------------------------------------------------------------
+# Likewise, Scots Gaelic
+#------------------------------------------------------------------------------
+if osmium extract --polygon /home/${local_filesystem_user}/src/SomeoneElse-style/scotsgd_areas.geojson newchange.osc.gz -O -o scotsgdlangpart_newchange_before.osc.gz
+then
+    echo ScotsGD Extract OK
+else
+    echo ScotsGD Extract Error
+    exit 1
+fi
+
+if /home/${local_filesystem_user}/src/osm-tags-transform/build/src/osm-tags-transform -c /home/${local_filesystem_user}/src/SomeoneElse-style/transform_gd.lua scotsgdlangpart_newchange_before.osc.gz -O -o scotsgdlangpart_newchange_after.osc.gz
+then
+    echo ScotsGD Transform OK
+else
+    echo ScotsGD Transform Error
+    exit 1
+fi
+
+#------------------------------------------------------------------------------
+# Unlike when using osmosis, which merges in a predictable way,
+# with osmium we have to explicitly extract the "English" part before conversion.
+# The "English" geojson is a large multipolygon with the "Welsh" and "ScotsGD" areas as holes
+# (using the exact same co-ordinates).
+#------------------------------------------------------------------------------
+if osmium extract --polygon /home/${local_filesystem_user}/src/SomeoneElse-style/english_areas.geojson newchange.osc.gz -O -o englishlangpart_newchange_before.osc.gz
+then
+    echo English Extract OK
+else
+    echo English Extract Error
+    exit 1
+fi
+
+if /home/${local_filesystem_user}/src/osm-tags-transform/build/src/osm-tags-transform -c /home/${local_filesystem_user}/src/SomeoneElse-style/transform_en.lua englishlangpart_newchange_before.osc.gz -O -o englishlangpart_newchange_after.osc.gz
+then
+    echo English Transform OK
+else
+    echo English Transform Error
+    exit 1
+fi
+
+#------------------------------------------------------------------------------
+# Unlike when using osmosis, which merges in a predictable way,
+# with osmium we have to explicitly extract the "Ireland" part before conversion.
+# The "Ireland" geojson does not need transforming.
+#------------------------------------------------------------------------------
+if osmium extract --polygon /home/${local_filesystem_user}/src/SomeoneElse-style/ireland.geojson newchange.osc.gz -O -o irelandpart_newchange.osc.gz
+then
+    echo Ireland Extract OK
+else
+    echo Ireland Extract Error
+    exit 1
+fi
+
+#------------------------------------------------------------------------------
+# With "osmium merge" there is no way to merge so that cy and gd files take precedence
+# over the en one, but following the extracts above all should be mutually exclusive.
+#------------------------------------------------------------------------------
+if osmium merge irelandpart_newchange.osc.gz englishlangpart_newchange_after.osc.gz welshlangpart_newchange_after.osc.gz scotsgdlangpart_newchange_after.osc.gz -O -o newchange_merged.osc.gz
+then
+    echo Merge OK
+else
+    echo Merge Error
+    exit 1
+fi
+
+#------------------------------------------------------------------------------
 # The osm2pgsql append line will need to be tailored to match the running system (memory and number of processors), the style in use, and
 # the number of zoom levels to write dirty tiles for.
 #------------------------------------------------------------------------------
 echo "Importing newchange.osc.gz"
-if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 -S /home/ajtown/src/openstreetmap-carto-AJT/openstreetmap-carto.style --multi-geometry --tag-transform-script /home/ajtown/src/SomeoneElse-style/style.lua --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
+if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 -S /home/ajtown/src/openstreetmap-carto-AJT/openstreetmap-carto.style --multi-geometry --tag-transform-script /home/ajtown/src/SomeoneElse-style/style.lua --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange_merged.osc.gz > osm2pgsql.$$ 2>&1
 then
     # ------------------------------------------------------------------------------
     # The osm2pgsql import failed; show the error, revert to the previous import
