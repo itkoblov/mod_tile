@@ -219,9 +219,9 @@ int xyzo_to_meta(char *path, size_t len, const char *tile_dir, const char *xmlco
 #ifdef DIRECTORY_HASH
 
 	if (strlen(options)) {
-		snprintf(path, len, "%s/%s/%d/%u/%u/%u/%u/%u/%u/%u.%s.meta", tile_dir, xmlconfig, z, hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0], options);
+	  snprintf(path, len, "%s/%s/%d/%u/%u/%u/%u/%u/%u/%u.%s.meta", tile_dir, xmlconfig, z, hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0], options);
 	} else {
-		snprintf(path, len, "%s/%s/%d/%u/%u/%u/%u/%u/%u/%u.meta", tile_dir, xmlconfig, z, hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]);
+	  snprintf(path, len, "%s/%s/%d/%u/%u/%u/%u/%u/%u/%u.meta", tile_dir, xmlconfig, z, hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]);
 	}
 
 #else
