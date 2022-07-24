@@ -14,6 +14,8 @@ Together they efficiently render and serve raster map tiles for example
 to use within a slippy map. The two consist of the classic raster tile
 stack from `OpenStreetMap.org <https://openstreetmap.org>`__.
 
+This branch supports zoom levels up to 28.
+
 As an alternative to ``renderd`` its drop-in replacement
 `Tirex <https://github.com/openstreetmap/tirex>`__ can be used in
 combination with ``mod_tile``.
@@ -163,7 +165,7 @@ special hashed directory structure. These combine 8x8 actual tiles into a
 single metatile file. This is a more efficient use of disk space and inodes.
 
 The metatiles are then stored in the following directory structure:
-``/[base_dir]/[TileSetName]/[Z]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy].png``
+``/[base_dir]/[TileSetName]/[Z]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy]/[xxxxyyyy].meta``
 
 Where ``base_dir`` is a configurable base path for all tiles. ``TileSetName``
 is the name of the style sheet rendered. ``Z`` is the zoom level.
@@ -190,7 +192,7 @@ also provides built-in features to scale to multi server rendering set-ups.
 Copyright and copyleft
 ----------------------
 
-Copyright (c) 2007 - 2021 by mod_tile contributors (see `AUTHORS <./AUTHORS>`__)
+Copyright (c) 2007 - 2022 by mod_tile contributors (see `AUTHORS <./AUTHORS>`__)
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
