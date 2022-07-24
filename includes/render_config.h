@@ -18,7 +18,7 @@
 #ifndef RENDER_CONFIG_H
 #define RENDER_CONFIG_H
 
-#define MAX_ZOOM 20
+#define MAX_ZOOM 28
 
 // MAX_SIZE is the biggest file which we will return to the user
 #define MAX_SIZE (1 * 1024 * 1024)
