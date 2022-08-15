@@ -7,6 +7,12 @@
 # when deciding if tiles exist already; it assumes they must be below /var/cache .
 # It therefore makes sense to use /var/cache/renderd/pyosmium for the files needed here.
 #
+# First, define the local user account we are using.
+# "local_filesystem_user" is whichever non-root account is used to fetch from
+# github.
+#
+local_filesystem_user=renderaccount
+#
 # To initialise "sequence.state", run:
 #
 # sudo mkdir /var/cache/renderd/pyosmium
@@ -69,7 +75,7 @@ pyosmium-get-changes -f sequence.state -o newchange.osc.gz -s 20 >> pyosmium.$$ 
 # See https://github.com/zverik/regional .
 # This area will usually correspond to the data originally loaded.
 #------------------------------------------------------------------------------
-TRIM_BIN=/home/renderaccount/src/regional/trim_osc.py
+TRIM_BIN=/home/${local_filesystem_user}/src/regional/trim_osc.py
 TRIM_REGION_OPTIONS="-b -14.17 48.85 2.12 61.27"
 #TRIM_REGION_OPTIONS="-p region.poly"
 
@@ -81,8 +87,7 @@ then
         echo "Trim_osc error but continue anyway"
     fi
 else
-    echo "${TRIM_BIN} does not exist"
-    exit 1
+    echo "${TRIM_BIN} does not exist but continue anyway"
 fi
 #
 #------------------------------------------------------------------------------
@@ -90,7 +95,7 @@ fi
 # the number of zoom levels to write dirty tiles for.
 #------------------------------------------------------------------------------
 echo "Importing newchange.osc.gz"
-if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 --multi-geometry --tag-transform-script /home/renderaccount/src/openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 2 -S /home/renderaccount/src/openstreetmap-carto/openstreetmap-carto.style --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
+if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 --multi-geometry --tag-transform-script /home/${local_filesystem_user}/src/openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 2 -S /home/${local_filesystem_user}/src/openstreetmap-carto/openstreetmap-carto.style --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
 then
     # ------------------------------------------------------------------------------
     # The osm2pgsql import failed; show the error, revert to the previous import
