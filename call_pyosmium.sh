@@ -95,7 +95,7 @@ fi
 # the number of zoom levels to write dirty tiles for.
 #------------------------------------------------------------------------------
 echo "Importing newchange.osc.gz"
-if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 --multi-geometry --tag-transform-script /home/${local_filesystem_user}/src/openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 2 -S /home/${local_filesystem_user}/src/openstreetmap-carto/openstreetmap-carto.style --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
+if ! osm2pgsql --append --slim -d gis -C 2500 --number-processes 2 --multi-geometry --tag-transform-script /home/${local_filesystem_user}/src/openstreetmap-carto/openstreetmap-carto.lua -S /home/${local_filesystem_user}/src/openstreetmap-carto/openstreetmap-carto.style --expire-tiles=1-20 --expire-output=/var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/newchange.osc.gz > osm2pgsql.$$ 2>&1
 then
     # ------------------------------------------------------------------------------
     # The osm2pgsql import failed; show the error, revert to the previous import
