@@ -120,7 +120,12 @@ echo "Expiring tiles"
 render_expired --map=s2o --min-zoom=13 --touch-from=13 --delete-from=19 --max-zoom=20 -s /run/renderd/renderd.sock < /var/cache/renderd/pyosmium/dirty_tiles.txt > render_expired.$$ 2>&1
 tail -9 render_expired.$$
 #
+#------------------------------------------------------------------------------
+# If debugging tile dirtying, comment out these two lines and uncomment the third.
+#------------------------------------------------------------------------------
 rm /var/cache/renderd/pyosmium/dirty_tiles.txt >> pyosmium.$$ 2>&1
+rm render_expired.$$
+#mv /var/cache/renderd/pyosmium/dirty_tiles.txt /var/cache/renderd/pyosmium/dirty_tiles.txt.$$ >> pyosmium.$$ 2>&1
 #
 #------------------------------------------------------------------------------
 # Tidy up files containing output from each command and the file that shows
@@ -128,7 +133,6 @@ rm /var/cache/renderd/pyosmium/dirty_tiles.txt >> pyosmium.$$ 2>&1
 #------------------------------------------------------------------------------
 rm trim.$$
 rm osm2pgsql.$$
-rm render_expired.$$
 rm pyosmium.$$
 rm /var/cache/renderd/pyosmium/call_pyosmium.running
 #
